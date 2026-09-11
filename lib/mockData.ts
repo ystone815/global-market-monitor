@@ -40,43 +40,43 @@ export const INITIAL_QUOTES: MarketQuote[] = [
   {
     symbol: '^GSPC',
     name: 'S&P 500',
-    price: 5648.40,
-    change: 32.15,
-    changePercent: 0.57,
-    high: 5660.10,
-    low: 5622.30,
-    volume: '3.45B',
+    price: 7125.40,
+    change: 48.20,
+    changePercent: 0.68,
+    high: 7140.10,
+    low: 7095.30,
+    volume: '4.15B',
     assetClass: 'indices',
     region: 'US',
-    sparkline: generateSparkline(5648.40),
+    sparkline: generateSparkline(7125.40),
     updatedAt: 'Just now'
   },
   {
     symbol: '^IXIC',
     name: 'Nasdaq Composite',
-    price: 17683.25,
-    change: 154.80,
-    changePercent: 0.88,
-    high: 17720.00,
-    low: 17540.50,
-    volume: '4.82B',
+    price: 22480.25,
+    change: 210.80,
+    changePercent: 0.95,
+    high: 22520.00,
+    low: 22340.50,
+    volume: '5.82B',
     assetClass: 'indices',
     region: 'US',
-    sparkline: generateSparkline(17683.25, 0.012),
+    sparkline: generateSparkline(22480.25, 0.012),
     updatedAt: 'Just now'
   },
   {
     symbol: '^DJI',
     name: 'Dow Jones',
-    price: 40345.10,
-    change: -45.20,
-    changePercent: -0.11,
-    high: 40480.00,
-    low: 40290.00,
-    volume: '310M',
+    price: 44345.10,
+    change: 120.20,
+    changePercent: 0.27,
+    high: 44480.00,
+    low: 44290.00,
+    volume: '410M',
     assetClass: 'indices',
     region: 'US',
-    sparkline: generateSparkline(40345.10, 0.004),
+    sparkline: generateSparkline(44345.10, 0.004),
     updatedAt: 'Just now'
   },
   {
@@ -166,85 +166,85 @@ export const INITIAL_QUOTES: MarketQuote[] = [
   {
     symbol: '^RUT',
     name: 'Russell 2000',
-    price: 2185.60,
+    price: 2285.60,
     change: 18.40,
-    changePercent: 0.85,
-    high: 2192.10,
-    low: 2165.00,
+    changePercent: 0.81,
+    high: 2292.10,
+    low: 2265.00,
     volume: '1.2B',
     assetClass: 'indices',
     region: 'US',
-    sparkline: generateSparkline(2185.60, 0.01),
+    sparkline: generateSparkline(2285.60, 0.01),
     updatedAt: 'Just now'
   },
   {
     symbol: '^GDAXI',
     name: 'DAX Performance-Index',
-    price: 18450.80,
+    price: 19450.80,
     change: 112.30,
-    changePercent: 0.61,
-    high: 18490.00,
-    low: 18380.00,
+    changePercent: 0.58,
+    high: 19490.00,
+    low: 19380.00,
     volume: '85M',
     assetClass: 'indices',
     region: 'EU',
-    sparkline: generateSparkline(18450.80, 0.006),
+    sparkline: generateSparkline(19450.80, 0.006),
     updatedAt: 'Just now'
   },
   {
     symbol: '^FTSE',
     name: 'FTSE 100',
-    price: 8245.50,
+    price: 8445.50,
     change: 22.10,
-    changePercent: 0.27,
-    high: 8260.00,
-    low: 8220.00,
+    changePercent: 0.26,
+    high: 8460.00,
+    low: 8420.00,
     volume: '620M',
     assetClass: 'indices',
     region: 'EU',
-    sparkline: generateSparkline(8245.50, 0.005),
+    sparkline: generateSparkline(8445.50, 0.005),
     updatedAt: 'Just now'
   },
   {
     symbol: '^N225',
     name: 'Nikkei 225',
-    price: 36580.40,
-    change: -210.50,
-    changePercent: -0.57,
-    high: 36890.00,
-    low: 36450.00,
+    price: 39580.40,
+    change: 210.50,
+    changePercent: 0.53,
+    high: 39890.00,
+    low: 39450.00,
     volume: '1.4B',
     assetClass: 'indices',
     region: 'ASIA',
-    sparkline: generateSparkline(36580.40, 0.009),
+    sparkline: generateSparkline(39580.40, 0.009),
     updatedAt: 'Just now'
   },
   {
     symbol: '^KS11',
     name: 'KOSPI Composite',
-    price: 2575.20,
-    change: 14.80,
-    changePercent: 0.58,
-    high: 2582.00,
-    low: 2560.00,
+    price: 2775.20,
+    change: 18.80,
+    changePercent: 0.68,
+    high: 2782.00,
+    low: 2760.00,
     volume: '480M',
     assetClass: 'indices',
     region: 'ASIA',
-    sparkline: generateSparkline(2575.20, 0.008),
+    sparkline: generateSparkline(2775.20, 0.008),
     updatedAt: 'Just now'
   },
   {
     symbol: '000001.SS',
     name: 'Shanghai Composite',
-    price: 2721.80,
-    change: -8.40,
-    changePercent: -0.31,
-    high: 2735.00,
-    low: 2715.00,
+    price: 3121.80,
+    change: 14.40,
+    changePercent: 0.46,
+    high: 3135.00,
+    low: 3115.00,
     volume: '2.1B',
     assetClass: 'indices',
     region: 'ASIA',
-    sparkline: generateSparkline(2721.80, 0.006),
+    sparkline: generateSparkline(3121.80, 0.006),
     updatedAt: 'Just now'
   },
   // Forex
@@ -358,29 +358,29 @@ export const ECONOMIC_CALENDAR: EconomicEvent[] = [
 export const MARKET_NEWS: MarketNews[] = [
   {
     id: 'n1',
+    title: 'S&P 500 Crosses 7,100 Milestone as US Tech Rally and Macro Rate Cuts Drive Global Market Highs',
+    source: 'Wall Street Journal',
+    time: '2 mins ago',
+    url: '#',
+    category: 'Equities',
+    sentiment: 'Bullish'
+  },
+  {
+    id: 'n2',
     title: 'Bitcoin Surges Past $77,000 Milestone on Massive Spot ETF Capital Inflows and Global Liquidity Expansion',
     source: 'CoinDesk / Binance Live',
-    time: '3 mins ago',
+    time: '5 mins ago',
     url: '#',
     category: 'Crypto',
     sentiment: 'Bullish'
   },
   {
-    id: 'n2',
+    id: 'n3',
     title: 'US M2 Money Supply Rebounds to $21.35 Trillion as Fed Balance Sheet Normalization Moderates',
     source: 'Federal Reserve Bank (FRED)',
-    time: '5 mins ago',
-    url: '#',
-    category: 'Macro Liquidity',
-    sentiment: 'Bullish'
-  },
-  {
-    id: 'n3',
-    title: 'Fed Rate Cut Expectations Boost Tech Stocks as S&P 500 Approaches Record Highs',
-    source: 'Bloomberg Financial',
     time: '8 mins ago',
     url: '#',
-    category: 'Equities',
+    category: 'Macro Liquidity',
     sentiment: 'Bullish'
   },
   {
@@ -414,11 +414,11 @@ export const MARKET_NEWS: MarketNews[] = [
 
 export function generateHistoricalChart(symbol: string, timeframe: string): ChartDataPoint[] {
   let pointsCount = 40;
-  let basePrice = 5648.40;
+  let basePrice = 7125.40;
   let volatility = 0.01;
 
-  if (symbol.includes('IXIC')) { basePrice = 17683.25; volatility = 0.015; }
-  else if (symbol.includes('DJI')) { basePrice = 40345.10; volatility = 0.008; }
+  if (symbol.includes('IXIC')) { basePrice = 22480.25; volatility = 0.015; }
+  else if (symbol.includes('DJI')) { basePrice = 44345.10; volatility = 0.008; }
   else if (symbol.includes('VIX')) { basePrice = 16.45; volatility = 0.03; }
   else if (symbol.includes('BTC')) { basePrice = 77450.00; volatility = 0.02; }
   else if (symbol.includes('CL=')) { basePrice = 69.45; volatility = 0.02; }

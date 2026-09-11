@@ -13,8 +13,7 @@ import {
   XAxis, 
   YAxis, 
   Tooltip, 
-  CartesianGrid,
-  Customized
+  CartesianGrid
 } from 'recharts';
 import { 
   BarChart2, 
@@ -35,62 +34,61 @@ interface MainChartStationProps {
   selectedQuote: MarketQuote;
 }
 
-// Custom Render for authentic Financial Candlestick (OHLC)
-const RenderCandlesticks = (props: any) => {
-  const { formattedGraphicalItems, yAxisMap } = props;
-  if (!formattedGraphicalItems || !formattedGraphicalItems.length) return null;
+// 100% Accurate SVG Candlestick Shape Renderer
+const CandlestickBarShape = (props: any) => {
+  const { x, y, width, height: barHeight, payload, yDomain } = props;
+  if (!payload || payload.open === undefined || payload.high === undefined || payload.low === undefined || payload.close === undefined) return null;
 
-  const series = formattedGraphicalItems[0];
-  const yAxis = yAxisMap[series.props.yAxisId || 'primary'];
-  const data = series.props.data || [];
+  const { open, close, high, low } = payload;
+  const isBullish = close >= open;
+  const strokeColor = isBullish ? '#10b981' : '#f43f5e';
+  const fillColor = isBullish ? '#10b981' : '#f43f5e';
+
+  const [minVal, maxVal] = yDomain || [0, 100];
+  const valSpan = maxVal - minVal || 1;
+
+  // Exact Y derivation from current bar position (bar's `y` corresponds to `close`)
+  const yBottom = y + barHeight;
+  const closeRatio = (close - minVal) / valSpan;
+  const totalChartHeight = closeRatio > 0 ? barHeight / closeRatio : barHeight;
+
+  const getY = (val: number) => {
+    const ratio = (val - minVal) / valSpan;
+    return yBottom - totalChartHeight * ratio;
+  };
+
+  const yOpen = getY(open);
+  const yClose = getY(close);
+  const yHigh = getY(high);
+  const yLow = getY(low);
+
+  const candleTop = Math.min(yOpen, yClose);
+  const candleHeight = Math.max(Math.abs(yOpen - yClose), 2);
+  const candleWidth = Math.max(Math.min(width * 0.6, 12), 3);
+  const xCenter = x + width / 2;
 
   return (
-    <g key="candlestick-layer">
-      {data.map((item: ChartDataPoint, idx: number) => {
-        const x = series.props.points?.[idx]?.x;
-        if (x === undefined || !yAxis) return null;
-
-        const { open, close, high, low } = item;
-        const isBullish = close >= open;
-        const strokeColor = isBullish ? '#10b981' : '#f43f5e';
-        const fillColor = isBullish ? '#10b981' : '#f43f5e';
-
-        const yOpen = yAxis.scale(open);
-        const yClose = yAxis.scale(close);
-        const yHigh = yAxis.scale(high);
-        const yLow = yAxis.scale(low);
-
-        const candleTop = Math.min(yOpen, yClose);
-        const candleHeight = Math.max(Math.abs(yOpen - yClose), 4);
-        const candleWidth = 9;
-
-        return (
-          <g key={`candle-${idx}`}>
-            {/* Wick Line */}
-            <line
-              x1={x}
-              y1={yHigh}
-              x2={x}
-              y2={yLow}
-              stroke={strokeColor}
-              strokeWidth={2}
-              opacity={0.95}
-            />
-            {/* Candle Body */}
-            <rect
-              x={x - candleWidth / 2}
-              y={candleTop}
-              width={candleWidth}
-              height={candleHeight}
-              fill={fillColor}
-              stroke={strokeColor}
-              strokeWidth={1}
-              rx={1.5}
-              opacity={0.95}
-            />
-          </g>
-        );
-      })}
+    <g className="recharts-layer recharts-candlestick">
+      {/* High-Low Wick Line */}
+      <line
+        x1={xCenter}
+        y1={yHigh}
+        x2={xCenter}
+        y2={yLow}
+        stroke={strokeColor}
+        strokeWidth={1.5}
+      />
+      {/* Open-Close Body Rect */}
+      <rect
+        x={xCenter - candleWidth / 2}
+        y={candleTop}
+        width={candleWidth}
+        height={candleHeight}
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth={1}
+        rx={1}
+      />
     </g>
   );
 };
@@ -425,18 +423,14 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               </Bar>
             )}
 
-            {/* Financial Candlestick View */}
+            {/* Financial Candlestick View using Custom Bar Shape */}
             {chartType === 'candlestick' && (
-              <>
-                <Line
-                  yAxisId="primary"
-                  type="monotone"
-                  dataKey="close"
-                  stroke="transparent"
-                  dot={false}
-                />
-                <Customized component={RenderCandlesticks} />
-              </>
+              <Bar
+                yAxisId="primary"
+                dataKey="close"
+                shape={(props: any) => <CandlestickBarShape {...props} yDomain={yDomain} />}
+                isAnimationActive={false}
+              />
             )}
 
             {showSMA && (

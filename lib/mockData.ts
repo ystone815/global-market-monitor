@@ -7,7 +7,8 @@ import {
   BondYield, 
   CryptoAsset, 
   EconomicEvent, 
-  MarketNews 
+  MarketNews,
+  M2MoneySupplyData
 } from './types';
 
 // Helper to generate sparklines
@@ -26,6 +27,14 @@ function generateSparkline(basePrice: number, volatility: number = 0.008, points
   }
   return result;
 }
+
+export const INITIAL_M2_DATA: M2MoneySupplyData = {
+  currentTrillion: 21.35,
+  yoyGrowthPct: 2.45,
+  momChangeBillion: 48.2,
+  updatedDate: 'Latest FRED Release',
+  fedBalanceSheetTrillion: 7.15
+};
 
 export const INITIAL_QUOTES: MarketQuote[] = [
   {
@@ -69,6 +78,20 @@ export const INITIAL_QUOTES: MarketQuote[] = [
     region: 'US',
     sparkline: generateSparkline(40345.10, 0.004),
     updatedAt: 'Just now'
+  },
+  {
+    symbol: 'M2-SUPPLY',
+    name: 'US M2 Money Supply',
+    price: 21.35,
+    change: 0.51,
+    changePercent: 2.45,
+    high: 21.40,
+    low: 20.80,
+    volume: '$21.35T',
+    assetClass: 'macro',
+    region: 'US',
+    sparkline: generateSparkline(21.35, 0.002),
+    updatedAt: 'FRED Monthly'
   },
   {
     symbol: '^RUT',
@@ -337,6 +360,15 @@ export const ECONOMIC_CALENDAR: EconomicEvent[] = [
 export const MARKET_NEWS: MarketNews[] = [
   {
     id: 'n1',
+    title: 'US M2 Money Supply Rebounds to $21.35 Trillion as Fed Balance Sheet Normalization Moderates',
+    source: 'Federal Reserve Bank (FRED)',
+    time: '5 mins ago',
+    url: '#',
+    category: 'Macro Liquidity',
+    sentiment: 'Bullish'
+  },
+  {
+    id: 'n2',
     title: 'Fed Rate Cut Expectations Boost Tech Stocks as S&P 500 Approaches Record Highs',
     source: 'Bloomberg Financial',
     time: '8 mins ago',
@@ -345,7 +377,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bullish'
   },
   {
-    id: 'n2',
+    id: 'n3',
     title: 'US 10-Year Treasury Yield Drops Below 3.70% Ahead of Key Inflation Data',
     source: 'Reuters',
     time: '24 mins ago',
@@ -354,7 +386,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Neutral'
   },
   {
-    id: 'n3',
+    id: 'n4',
     title: 'WTI Crude Oil Rebounds 1.8% Following Middle East Supply Concerns and Inventory Drawdown',
     source: 'Financial Times',
     time: '45 mins ago',
@@ -363,7 +395,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bullish'
   },
   {
-    id: 'n4',
+    id: 'n5',
     title: 'USD/KRW Slips to 1,335 Won as Risk-On Sentiment Drives Asian Market Inflows',
     source: 'Korea Economic Daily',
     time: '1 hour ago',
@@ -372,7 +404,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bearish'
   },
   {
-    id: 'n5',
+    id: 'n6',
     title: 'Bitcoin Reclaims $58,000 Level as Institutional ETF Inflows Resume',
     source: 'CoinDesk',
     time: '2 hours ago',
@@ -393,6 +425,7 @@ export function generateHistoricalChart(symbol: string, timeframe: string): Char
   else if (symbol.includes('CL=')) { basePrice = 69.45; volatility = 0.02; }
   else if (symbol.includes('KRW')) { basePrice = 1335.50; volatility = 0.004; }
   else if (symbol.includes('GC=')) { basePrice = 2585.50; volatility = 0.009; }
+  else if (symbol.includes('M2')) { basePrice = 21.35; volatility = 0.002; }
 
   if (timeframe === '1D') pointsCount = 24;
   if (timeframe === '1W') pointsCount = 35;
@@ -433,7 +466,8 @@ export function generateHistoricalChart(symbol: string, timeframe: string): Char
       close: Number(close.toFixed(2)),
       volume,
       sma20: Number((close * (0.99 + Math.sin(i / 3) * 0.015)).toFixed(2)),
-      rsi: Number((50 + Math.sin(i / 2) * 22).toFixed(1))
+      rsi: Number((50 + Math.sin(i / 2) * 22).toFixed(1)),
+      m2Val: Number((21.35 + (i / pointsCount) * 0.4).toFixed(2))
     });
   }
 

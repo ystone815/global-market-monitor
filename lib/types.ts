@@ -1,4 +1,4 @@
-export type AssetClass = 'indices' | 'forex' | 'commodities' | 'bonds' | 'crypto';
+export type AssetClass = 'indices' | 'forex' | 'commodities' | 'bonds' | 'crypto' | 'macro';
 export type Region = 'US' | 'EU' | 'ASIA' | 'GLOBAL';
 
 export interface SparklinePoint {
@@ -33,6 +33,15 @@ export interface ChartDataPoint {
   sma20?: number;
   ema50?: number;
   rsi?: number;
+  m2Val?: number;
+}
+
+export interface M2MoneySupplyData {
+  currentTrillion: number; // e.g. 21.32 Trillion
+  yoyGrowthPct: number; // e.g. +2.4%
+  momChangeBillion: number; // e.g. +$45.8B
+  updatedDate: string; // e.g. 'Aug 2026'
+  fedBalanceSheetTrillion: number; // e.g. $7.12T
 }
 
 export interface MarketSentiment {

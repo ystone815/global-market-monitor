@@ -110,15 +110,15 @@ export const INITIAL_QUOTES: MarketQuote[] = [
   {
     symbol: 'BTC-USD',
     name: 'Bitcoin',
-    price: 58450.00,
-    change: 1420.00,
-    changePercent: 2.49,
-    high: 59100.00,
-    low: 56800.00,
-    volume: '28.4B',
+    price: 77450.00,
+    change: 1820.00,
+    changePercent: 2.41,
+    high: 78100.00,
+    low: 75500.00,
+    volume: '38.4B',
     assetClass: 'crypto',
     region: 'GLOBAL',
-    sparkline: generateSparkline(58450.00, 0.02),
+    sparkline: generateSparkline(77450.00, 0.015),
     updatedAt: 'Just now'
   },
   {
@@ -293,15 +293,15 @@ export const INITIAL_QUOTES: MarketQuote[] = [
   {
     symbol: 'ETH-USD',
     name: 'Ethereum',
-    price: 2360.80,
-    change: 68.50,
-    changePercent: 2.99,
-    high: 2395.00,
-    low: 2280.00,
-    volume: '14.2B',
+    price: 3120.80,
+    change: 88.50,
+    changePercent: 2.92,
+    high: 3195.00,
+    low: 3040.00,
+    volume: '18.2B',
     assetClass: 'crypto',
     region: 'GLOBAL',
-    sparkline: generateSparkline(2360.80, 0.025),
+    sparkline: generateSparkline(3120.80, 0.02),
     updatedAt: 'Just now'
   }
 ];
@@ -340,11 +340,11 @@ export const BOND_YIELDS: BondYield[] = [
 ];
 
 export const CRYPTO_ASSETS: CryptoAsset[] = [
-  { symbol: 'BTC', name: 'Bitcoin', price: 58450.00, change24h: 2.49, volume24h: '$28.4B', marketCap: '$1.15T', dominance: 56.4 },
-  { symbol: 'ETH', name: 'Ethereum', price: 2360.80, change24h: 2.99, volume24h: '$14.2B', marketCap: '$284B', dominance: 14.1 },
-  { symbol: 'SOL', name: 'Solana', price: 136.40, change24h: 4.82, volume24h: '$2.8B', marketCap: '$63.8B', dominance: 3.2 },
-  { symbol: 'BNB', name: 'BNB', price: 542.10, change24h: 1.12, volume24h: '$850M', marketCap: '$79.2B', dominance: 3.9 },
-  { symbol: 'XRP', name: 'XRP', price: 0.562, change24h: -0.84, volume24h: '$1.1B', marketCap: '$31.6B', dominance: 1.6 }
+  { symbol: 'BTC', name: 'Bitcoin', price: 77450.00, change24h: 2.41, volume24h: '$38.4B', marketCap: '$1.52T', dominance: 57.8 },
+  { symbol: 'ETH', name: 'Ethereum', price: 3120.80, change24h: 2.92, volume24h: '$18.2B', marketCap: '$375B', dominance: 14.3 },
+  { symbol: 'SOL', name: 'Solana', price: 188.40, change24h: 5.12, volume24h: '$4.2B', marketCap: '$88.8B', dominance: 3.5 },
+  { symbol: 'BNB', name: 'BNB', price: 625.10, change24h: 1.45, volume24h: '$1.2B', marketCap: '$91.2B', dominance: 3.6 },
+  { symbol: 'XRP', name: 'XRP', price: 0.685, change24h: 0.95, volume24h: '$1.8B', marketCap: '$38.6B', dominance: 1.5 }
 ];
 
 export const ECONOMIC_CALENDAR: EconomicEvent[] = [
@@ -358,6 +358,15 @@ export const ECONOMIC_CALENDAR: EconomicEvent[] = [
 export const MARKET_NEWS: MarketNews[] = [
   {
     id: 'n1',
+    title: 'Bitcoin Surges Past $77,000 Milestone on Massive Spot ETF Capital Inflows and Global Liquidity Expansion',
+    source: 'CoinDesk / Binance Live',
+    time: '3 mins ago',
+    url: '#',
+    category: 'Crypto',
+    sentiment: 'Bullish'
+  },
+  {
+    id: 'n2',
     title: 'US M2 Money Supply Rebounds to $21.35 Trillion as Fed Balance Sheet Normalization Moderates',
     source: 'Federal Reserve Bank (FRED)',
     time: '5 mins ago',
@@ -366,7 +375,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bullish'
   },
   {
-    id: 'n2',
+    id: 'n3',
     title: 'Fed Rate Cut Expectations Boost Tech Stocks as S&P 500 Approaches Record Highs',
     source: 'Bloomberg Financial',
     time: '8 mins ago',
@@ -375,7 +384,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bullish'
   },
   {
-    id: 'n3',
+    id: 'n4',
     title: 'US 10-Year Treasury Yield Drops Below 3.70% Ahead of Key Inflation Data',
     source: 'Reuters',
     time: '24 mins ago',
@@ -384,7 +393,7 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Neutral'
   },
   {
-    id: 'n4',
+    id: 'n5',
     title: 'WTI Crude Oil Rebounds 1.8% Following Middle East Supply Concerns and Inventory Drawdown',
     source: 'Financial Times',
     time: '45 mins ago',
@@ -393,22 +402,13 @@ export const MARKET_NEWS: MarketNews[] = [
     sentiment: 'Bullish'
   },
   {
-    id: 'n5',
+    id: 'n6',
     title: 'USD/KRW Slips to 1,335 Won as Risk-On Sentiment Drives Asian Market Inflows',
     source: 'Korea Economic Daily',
     time: '1 hour ago',
     url: '#',
     category: 'Forex',
     sentiment: 'Bearish'
-  },
-  {
-    id: 'n6',
-    title: 'Bitcoin Reclaims $58,000 Level as Institutional ETF Inflows Resume',
-    source: 'CoinDesk',
-    time: '2 hours ago',
-    url: '#',
-    category: 'Crypto',
-    sentiment: 'Bullish'
   }
 ];
 
@@ -420,7 +420,7 @@ export function generateHistoricalChart(symbol: string, timeframe: string): Char
   if (symbol.includes('IXIC')) { basePrice = 17683.25; volatility = 0.015; }
   else if (symbol.includes('DJI')) { basePrice = 40345.10; volatility = 0.008; }
   else if (symbol.includes('VIX')) { basePrice = 16.45; volatility = 0.03; }
-  else if (symbol.includes('BTC')) { basePrice = 58450.00; volatility = 0.025; }
+  else if (symbol.includes('BTC')) { basePrice = 77450.00; volatility = 0.02; }
   else if (symbol.includes('CL=')) { basePrice = 69.45; volatility = 0.02; }
   else if (symbol.includes('KRW')) { basePrice = 1335.50; volatility = 0.004; }
   else if (symbol.includes('GC=')) { basePrice = 2585.50; volatility = 0.009; }

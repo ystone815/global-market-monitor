@@ -12,7 +12,8 @@ import {
   XAxis, 
   YAxis, 
   Tooltip, 
-  CartesianGrid 
+  CartesianGrid,
+  Customized
 } from 'recharts';
 import { 
   BarChart2, 
@@ -24,16 +25,76 @@ import {
   Flame,
   Droplet,
   Bitcoin as BitcoinIcon,
-  Banknote
+  Banknote,
+  CandlestickChart
 } from 'lucide-react';
 
 interface MainChartStationProps {
   selectedQuote: MarketQuote;
 }
 
+// Custom Render for authentic Financial Candlestick (OHLC)
+const RenderCandlesticks = (props: any) => {
+  const { formattedGraphicalItems, xAxisMap, yAxisMap } = props;
+  if (!formattedGraphicalItems || !formattedGraphicalItems.length) return null;
+
+  const series = formattedGraphicalItems[0];
+  const yAxis = yAxisMap[series.props.yAxisId || 'primary'];
+  const data = series.props.data || [];
+
+  return (
+    <g key="candlestick-layer">
+      {data.map((item: ChartDataPoint, idx: number) => {
+        const x = series.props.points?.[idx]?.x;
+        if (x === undefined || !yAxis) return null;
+
+        const { open, close, high, low } = item;
+        const isBullish = close >= open;
+        const strokeColor = isBullish ? '#10b981' : '#f43f5e';
+        const fillColor = isBullish ? '#10b981' : '#f43f5e';
+
+        const yOpen = yAxis.scale(open);
+        const yClose = yAxis.scale(close);
+        const yHigh = yAxis.scale(high);
+        const yLow = yAxis.scale(low);
+
+        const candleTop = Math.min(yOpen, yClose);
+        const candleHeight = Math.max(Math.abs(yOpen - yClose), 3);
+        const candleWidth = 8;
+
+        return (
+          <g key={`candle-${idx}`}>
+            {/* Wick */}
+            <line
+              x1={x}
+              y1={yHigh}
+              x2={x}
+              y2={yLow}
+              stroke={strokeColor}
+              strokeWidth={1.5}
+              opacity={0.9}
+            />
+            {/* Body */}
+            <rect
+              x={x - candleWidth / 2}
+              y={candleTop}
+              width={candleWidth}
+              height={candleHeight}
+              fill={fillColor}
+              stroke={strokeColor}
+              rx={1}
+              opacity={0.9}
+            />
+          </g>
+        );
+      })}
+    </g>
+  );
+};
+
 export function MainChartStation({ selectedQuote }: MainChartStationProps) {
   const [timeframe, setTimeframe] = useState<string>('1M');
-  const [chartType, setChartType] = useState<'area' | 'bar'>('area');
+  const [chartType, setChartType] = useState<'area' | 'candlestick' | 'bar'>('area');
   const [showSMA, setShowSMA] = useState<boolean>(true);
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [overlayAsset, setOverlayAsset] = useState<'none' | 'vix' | 'm2' | 'gold' | 'oil' | 'btc'>('none');
@@ -155,25 +216,39 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
             ))}
           </div>
 
-          {/* Chart Type Toggle */}
-          <div className="glass-pill p-1 rounded-xl flex items-center gap-1">
+          {/* Chart Type Toggle: Area / Candlestick / Bar */}
+          <div className="glass-pill p-1 rounded-xl flex items-center gap-1 text-xs font-semibold">
             <button
               onClick={() => setChartType('area')}
-              className={`p-1.5 rounded-lg transition-colors ${
-                chartType === 'area' ? 'bg-slate-700 text-indigo-400' : 'text-slate-400 hover:text-slate-200'
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors ${
+                chartType === 'area' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Area Line Chart"
             >
-              <LineChart className="w-4 h-4" />
+              <LineChart className="w-3.5 h-3.5" />
+              <span>Area</span>
             </button>
+
+            <button
+              onClick={() => setChartType('candlestick')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors ${
+                chartType === 'candlestick' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Candlestick Chart"
+            >
+              <CandlestickChart className="w-3.5 h-3.5 text-amber-300" />
+              <span>Candle 🕯️</span>
+            </button>
+
             <button
               onClick={() => setChartType('bar')}
-              className={`p-1.5 rounded-lg transition-colors ${
-                chartType === 'bar' ? 'bg-slate-700 text-indigo-400' : 'text-slate-400 hover:text-slate-200'
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors ${
+                chartType === 'bar' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Bar View"
+              title="Price Bar View"
             >
-              <BarChart2 className="w-4 h-4" />
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span>Bar</span>
             </button>
           </div>
 
@@ -281,7 +356,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               />
             )}
 
-            {chartType === 'area' ? (
+            {chartType === 'area' && (
               <Area
                 yAxisId="primary"
                 type="monotone"
@@ -291,13 +366,29 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
                 fillOpacity={1}
                 fill="url(#mainGradient)"
               />
-            ) : (
+            )}
+
+            {chartType === 'bar' && (
               <Bar
                 yAxisId="primary"
                 dataKey="close"
                 fill={isPositive ? '#10b981' : '#f43f5e'}
                 opacity={0.85}
+                barSize={10}
               />
+            )}
+
+            {chartType === 'candlestick' && (
+              <>
+                <Line
+                  yAxisId="primary"
+                  type="monotone"
+                  dataKey="close"
+                  stroke="transparent"
+                  dot={false}
+                />
+                <Customized component={RenderCandlesticks} />
+              </>
             )}
 
             {showSMA && (
@@ -341,8 +432,8 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
         </div>
 
         <div className="glass-pill p-2.5 rounded-xl">
-          <span className="text-slate-400 block text-[10px]">MACRO OVERLAY SIGNAL</span>
-          <span className="text-emerald-400 font-bold mt-0.5 block uppercase">{overlayAsset} Active</span>
+          <span className="text-slate-400 block text-[10px]">CHART MODE</span>
+          <span className="text-amber-400 font-bold mt-0.5 block uppercase">{chartType} View</span>
         </div>
 
         <div className="glass-pill p-2.5 rounded-xl">

@@ -80,6 +80,20 @@ export const INITIAL_QUOTES: MarketQuote[] = [
     updatedAt: 'Just now'
   },
   {
+    symbol: '^VIX',
+    name: 'CBOE Volatility Index (VIX)',
+    price: 16.45,
+    change: -0.85,
+    changePercent: -4.91,
+    high: 17.80,
+    low: 15.90,
+    volume: 'N/A',
+    assetClass: 'indices',
+    region: 'US',
+    sparkline: generateSparkline(16.45, 0.02),
+    updatedAt: 'Just now'
+  },
+  {
     symbol: 'M2-SUPPLY',
     name: 'US M2 Money Supply',
     price: 21.35,
@@ -92,6 +106,62 @@ export const INITIAL_QUOTES: MarketQuote[] = [
     region: 'US',
     sparkline: generateSparkline(21.35, 0.002),
     updatedAt: 'FRED Monthly'
+  },
+  {
+    symbol: 'BTC-USD',
+    name: 'Bitcoin',
+    price: 58450.00,
+    change: 1420.00,
+    changePercent: 2.49,
+    high: 59100.00,
+    low: 56800.00,
+    volume: '28.4B',
+    assetClass: 'crypto',
+    region: 'GLOBAL',
+    sparkline: generateSparkline(58450.00, 0.02),
+    updatedAt: 'Just now'
+  },
+  {
+    symbol: 'GC=F',
+    name: 'Gold Futures',
+    price: 2585.50,
+    change: 18.20,
+    changePercent: 0.71,
+    high: 2592.00,
+    low: 2568.00,
+    volume: '185K',
+    assetClass: 'commodities',
+    region: 'GLOBAL',
+    sparkline: generateSparkline(2585.50, 0.007),
+    updatedAt: 'Just now'
+  },
+  {
+    symbol: 'CL=F',
+    name: 'Crude Oil WTI',
+    price: 69.45,
+    change: 1.25,
+    changePercent: 1.83,
+    high: 70.10,
+    low: 68.15,
+    volume: '340K',
+    assetClass: 'commodities',
+    region: 'GLOBAL',
+    sparkline: generateSparkline(69.45, 0.015),
+    updatedAt: 'Just now'
+  },
+  {
+    symbol: '^TNX',
+    name: 'US 10Y Treasury Yield',
+    price: 3.66,
+    change: -0.04,
+    changePercent: -1.08,
+    high: 3.71,
+    low: 3.65,
+    volume: 'N/A',
+    assetClass: 'bonds',
+    region: 'US',
+    sparkline: generateSparkline(3.66, 0.008),
+    updatedAt: 'Just now'
   },
   {
     symbol: '^RUT',
@@ -220,64 +290,6 @@ export const INITIAL_QUOTES: MarketQuote[] = [
     sparkline: generateSparkline(141.25, 0.005),
     updatedAt: 'Just now'
   },
-  // Commodities
-  {
-    symbol: 'CL=F',
-    name: 'Crude Oil WTI',
-    price: 69.45,
-    change: 1.25,
-    changePercent: 1.83,
-    high: 70.10,
-    low: 68.15,
-    volume: '340K',
-    assetClass: 'commodities',
-    region: 'GLOBAL',
-    sparkline: generateSparkline(69.45, 0.015),
-    updatedAt: 'Just now'
-  },
-  {
-    symbol: 'GC=F',
-    name: 'Gold Futures',
-    price: 2585.50,
-    change: 18.20,
-    changePercent: 0.71,
-    high: 2592.00,
-    low: 2568.00,
-    volume: '185K',
-    assetClass: 'commodities',
-    region: 'GLOBAL',
-    sparkline: generateSparkline(2585.50, 0.007),
-    updatedAt: 'Just now'
-  },
-  {
-    symbol: 'HG=F',
-    name: 'Copper Futures',
-    price: 4.22,
-    change: 0.06,
-    changePercent: 1.44,
-    high: 4.25,
-    low: 4.15,
-    volume: '82K',
-    assetClass: 'commodities',
-    region: 'GLOBAL',
-    sparkline: generateSparkline(4.22, 0.01),
-    updatedAt: 'Just now'
-  },
-  // Crypto
-  {
-    symbol: 'BTC-USD',
-    name: 'Bitcoin',
-    price: 58450.00,
-    change: 1420.00,
-    changePercent: 2.49,
-    high: 59100.00,
-    low: 56800.00,
-    volume: '28.4B',
-    assetClass: 'crypto',
-    region: 'GLOBAL',
-    sparkline: generateSparkline(58450.00, 0.02),
-    updatedAt: 'Just now'
-  },
   {
     symbol: 'ETH-USD',
     name: 'Ethereum',
@@ -290,20 +302,6 @@ export const INITIAL_QUOTES: MarketQuote[] = [
     assetClass: 'crypto',
     region: 'GLOBAL',
     sparkline: generateSparkline(2360.80, 0.025),
-    updatedAt: 'Just now'
-  },
-  {
-    symbol: '^TNX',
-    name: 'US 10Y Treasury Yield',
-    price: 3.66,
-    change: -0.04,
-    changePercent: -1.08,
-    high: 3.71,
-    low: 3.65,
-    volume: 'N/A',
-    assetClass: 'bonds',
-    region: 'US',
-    sparkline: generateSparkline(3.66, 0.008),
     updatedAt: 'Just now'
   }
 ];
@@ -421,10 +419,12 @@ export function generateHistoricalChart(symbol: string, timeframe: string): Char
 
   if (symbol.includes('IXIC')) { basePrice = 17683.25; volatility = 0.015; }
   else if (symbol.includes('DJI')) { basePrice = 40345.10; volatility = 0.008; }
+  else if (symbol.includes('VIX')) { basePrice = 16.45; volatility = 0.03; }
   else if (symbol.includes('BTC')) { basePrice = 58450.00; volatility = 0.025; }
   else if (symbol.includes('CL=')) { basePrice = 69.45; volatility = 0.02; }
   else if (symbol.includes('KRW')) { basePrice = 1335.50; volatility = 0.004; }
   else if (symbol.includes('GC=')) { basePrice = 2585.50; volatility = 0.009; }
+  else if (symbol.includes('TNX')) { basePrice = 3.66; volatility = 0.012; }
   else if (symbol.includes('M2')) { basePrice = 21.35; volatility = 0.002; }
 
   if (timeframe === '1D') pointsCount = 24;

@@ -9,6 +9,7 @@ import {
   Area, 
   Line, 
   Bar, 
+  Cell,
   XAxis, 
   YAxis, 
   Tooltip, 
@@ -60,8 +61,8 @@ const RenderCandlesticks = (props: any) => {
         const yLow = yAxis.scale(low);
 
         const candleTop = Math.min(yOpen, yClose);
-        const candleHeight = Math.max(Math.abs(yOpen - yClose), 3);
-        const candleWidth = 8;
+        const candleHeight = Math.max(Math.abs(yOpen - yClose), 4);
+        const candleWidth = 9;
 
         return (
           <g key={`candle-${idx}`}>
@@ -72,8 +73,8 @@ const RenderCandlesticks = (props: any) => {
               x2={x}
               y2={yLow}
               stroke={strokeColor}
-              strokeWidth={1.5}
-              opacity={0.9}
+              strokeWidth={2}
+              opacity={0.95}
             />
             {/* Candle Body */}
             <rect
@@ -83,8 +84,9 @@ const RenderCandlesticks = (props: any) => {
               height={candleHeight}
               fill={fillColor}
               stroke={strokeColor}
-              rx={1}
-              opacity={0.9}
+              strokeWidth={1}
+              rx={1.5}
+              opacity={0.95}
             />
           </g>
         );
@@ -279,7 +281,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               title="Price Bar View"
             >
               <BarChart2 className="w-3.5 h-3.5" />
-              <span>Bar</span>
+              <span>Bar 📊</span>
             </button>
           </div>
 
@@ -363,7 +365,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               tickFormatter={(val) => val.toLocaleString()}
             />
 
-            {/* Separate Axis for Volume to prevent flattening stock candles */}
+            {/* Separate Axis for Volume */}
             <YAxis
               yAxisId="volumeAxis"
               hide={true}
@@ -406,16 +408,24 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               />
             )}
 
+            {/* Color-coded Price Bars for Bar Chart View */}
             {chartType === 'bar' && (
               <Bar
                 yAxisId="primary"
                 dataKey="close"
-                fill={isPositive ? '#10b981' : '#f43f5e'}
-                opacity={0.85}
-                barSize={10}
-              />
+                opacity={0.9}
+                barSize={8}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.close >= entry.open ? '#10b981' : '#f43f5e'}
+                  />
+                ))}
+              </Bar>
             )}
 
+            {/* Financial Candlestick View */}
             {chartType === 'candlestick' && (
               <>
                 <Line

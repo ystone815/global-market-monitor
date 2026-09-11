@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { TickerTape } from '@/components/TickerTape';
+import { MacroCommandCenter } from '@/components/MacroCommandCenter';
 import { MarketOverviewGrid } from '@/components/MarketOverviewGrid';
 import { MainChartStation } from '@/components/MainChartStation';
 import { SentimentGauge } from '@/components/SentimentGauge';
@@ -28,7 +29,7 @@ export default function Home() {
   const [activeAssetFilter, setActiveAssetFilter] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<string>('Just now');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [watchlist, setWatchlist] = useState<string[]>(['^GSPC', '^IXIC', 'USD/KRW', 'BTC-USD']);
+  const [watchlist, setWatchlist] = useState<string[]>(['^GSPC', '^IXIC', 'USD/KRW', 'BTC-USD', 'GC=F', 'CL=F']);
 
   // Load Watchlist from LocalStorage on mount
   useEffect(() => {
@@ -124,7 +125,17 @@ export default function Home() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-8">
         
-        {/* TOP SECTION: Main Charting Station & Sentiment Gauge */}
+        {/* TOPMOST SECTION: MACRO COMMAND CENTER (VIX, GOLD, OIL, BITCOIN, 10Y YIELD/FX) */}
+        <section>
+          <MacroCommandCenter
+            quotes={quotes}
+            sentiment={sentiment}
+            onSelectQuote={setSelectedQuote}
+            selectedSymbol={selectedQuote.symbol}
+          />
+        </section>
+
+        {/* MAIN CHART STATION & SENTIMENT / WATCHLIST SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-8">
             <MainChartStation selectedQuote={selectedQuote} />
@@ -140,7 +151,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* MIDDLE SECTION: Asset Filter Buttons & Market Grid */}
+        {/* ASSET FILTER BUTTONS & MARKET OVERVIEW GRID */}
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-3 rounded-2xl">
             <div className="flex flex-wrap items-center gap-1.5">
@@ -181,7 +192,7 @@ export default function Home() {
           />
         </section>
 
-        {/* BOTTOM SECTION: Multi-Asset Deep Dive Tabs & Macro/News */}
+        {/* MULTI-ASSET DEEP DIVE TABS & MACRO / NEWS */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-8 space-y-6">
             <AssetClassTabs sectors={sectors} bondYields={bondYields} cryptoAssets={crypto} />
@@ -198,7 +209,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>GLOBAL MARKET MONITOR • VERCEL READY ENGINE</span>
+            <span>GLOBAL MARKET MONITOR • MACRO COMMAND CENTER</span>
           </div>
           <div>
             <span>GitHub Repository: </span>

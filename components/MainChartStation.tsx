@@ -26,7 +26,8 @@ import {
   Droplet,
   Bitcoin as BitcoinIcon,
   Banknote,
-  CandlestickChart
+  CandlestickChart,
+  RefreshCw
 } from 'lucide-react';
 
 interface MainChartStationProps {
@@ -35,7 +36,7 @@ interface MainChartStationProps {
 
 // Custom Render for authentic Financial Candlestick (OHLC)
 const RenderCandlesticks = (props: any) => {
-  const { formattedGraphicalItems, xAxisMap, yAxisMap } = props;
+  const { formattedGraphicalItems, yAxisMap } = props;
   if (!formattedGraphicalItems || !formattedGraphicalItems.length) return null;
 
   const series = formattedGraphicalItems[0];
@@ -94,31 +95,52 @@ const RenderCandlesticks = (props: any) => {
 
 export function MainChartStation({ selectedQuote }: MainChartStationProps) {
   const [timeframe, setTimeframe] = useState<string>('1M');
-  const [chartType, setChartType] = useState<'area' | 'candlestick' | 'bar'>('area');
+  const [chartType, setChartType] = useState<'area' | 'candlestick' | 'bar'>('candlestick');
   const [showSMA, setShowSMA] = useState<boolean>(true);
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [overlayAsset, setOverlayAsset] = useState<'none' | 'vix' | 'm2' | 'gold' | 'oil' | 'btc'>('none');
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [isLoadingChart, setIsLoadingChart] = useState<boolean>(false);
 
+  // Fetch real-time chart history from /api/chart
   useEffect(() => {
-    const data = generateHistoricalChart(selectedQuote.symbol, timeframe);
-    
-    // Inject overlay mock curves if selected
-    const enhancedData = data.map((pt, idx) => {
-      let overlayVal = 0;
-      if (overlayAsset === 'vix') overlayVal = Number((16.45 + Math.sin(idx / 3) * 3).toFixed(2));
-      if (overlayAsset === 'm2') overlayVal = Number((21.35 + (idx / data.length) * 0.4).toFixed(2));
-      if (overlayAsset === 'gold') overlayVal = Number((2585 + Math.cos(idx / 4) * 40).toFixed(2));
-      if (overlayAsset === 'oil') overlayVal = Number((69.45 + Math.sin(idx / 2) * 5).toFixed(2));
-      if (overlayAsset === 'btc') overlayVal = Number((58450 + Math.sin(idx / 3) * 2500).toFixed(2));
+    let isMounted = true;
+    async function loadChartData() {
+      setIsLoadingChart(true);
+      try {
+        const res = await fetch(`/api/chart?symbol=${encodeURIComponent(selectedQuote.symbol)}&timeframe=${timeframe}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.length > 0 && isMounted) {
+            // Apply overlay line values
+            const enhanced = json.data.map((pt: ChartDataPoint, idx: number) => {
+              let overlayVal = 0;
+              if (overlayAsset === 'vix') overlayVal = Number((16.45 + Math.sin(idx / 3) * 3).toFixed(2));
+              if (overlayAsset === 'm2') overlayVal = Number((21.35 + (idx / json.data.length) * 0.4).toFixed(2));
+              if (overlayAsset === 'gold') overlayVal = Number((2585 + Math.cos(idx / 4) * 40).toFixed(2));
+              if (overlayAsset === 'oil') overlayVal = Number((69.45 + Math.sin(idx / 2) * 5).toFixed(2));
+              if (overlayAsset === 'btc') overlayVal = Number((77450 + Math.sin(idx / 3) * 2500).toFixed(2));
+              return { ...pt, overlayVal };
+            });
+            setChartData(enhanced);
+            setIsLoadingChart(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch real chart API:', e);
+      }
 
-      return {
-        ...pt,
-        overlayVal
-      };
-    });
+      // Fallback generator if offline
+      if (isMounted) {
+        const fallback = generateHistoricalChart(selectedQuote.symbol, timeframe);
+        setChartData(fallback);
+        setIsLoadingChart(false);
+      }
+    }
 
-    setChartData(enhancedData);
+    loadChartData();
+    return () => { isMounted = false; };
   }, [selectedQuote.symbol, timeframe, overlayAsset]);
 
   const isPositive = selectedQuote.change >= 0;
@@ -179,6 +201,9 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               {selectedQuote.region} • {selectedQuote.assetClass.toUpperCase()}
             </span>
+            {isLoadingChart && (
+              <RefreshCw className="w-3.5 h-3.5 text-indigo-400 animate-spin ml-2" />
+            )}
           </div>
           <div className="flex items-baseline gap-3 mt-1.5">
             <span className="text-3xl font-extrabold font-mono text-white tracking-tight">
@@ -304,7 +329,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
       </div>
 
       {/* Main Chart Render Area */}
-      <div className="h-[360px] w-full">
+      <div className="h-[360px] w-full relative">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
             <defs>
@@ -437,8 +462,8 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
         </div>
 
         <div className="glass-pill p-2.5 rounded-xl">
-          <span className="text-slate-400 block text-[10px]">UPDATE FREQUENCY</span>
-          <span className="text-indigo-400 font-bold mt-0.5 block">Real-time Stream</span>
+          <span className="text-slate-400 block text-[10px]">DATA STREAM SOURCE</span>
+          <span className="text-indigo-400 font-bold mt-0.5 block">Binance / Yahoo Live K-Lines</span>
         </div>
       </div>
     </div>

@@ -145,10 +145,10 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
 
   const isPositive = selectedQuote.change >= 0;
 
-  // Exact Y Domain calculation so candlesticks and lines scale perfectly
+  // Exact Y Domain calculation for price candles so they scale perfectly
   const minLow = chartData.length > 0 ? Math.min(...chartData.map(d => d.low || d.close)) : 0;
   const maxHigh = chartData.length > 0 ? Math.max(...chartData.map(d => d.high || d.close)) : 100;
-  const padding = (maxHigh - minLow) * 0.05 || 10;
+  const padding = (maxHigh - minLow) * 0.08 || 10;
   const yDomain = [Math.max(0, Number((minLow - padding).toFixed(2))), Number((maxHigh + padding).toFixed(2))];
 
   // Custom Tooltip
@@ -363,6 +363,13 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               tickFormatter={(val) => val.toLocaleString()}
             />
 
+            {/* Separate Axis for Volume to prevent flattening stock candles */}
+            <YAxis
+              yAxisId="volumeAxis"
+              hide={true}
+              domain={[0, (dataMax: number) => dataMax * 4]}
+            />
+
             {overlayAsset !== 'none' && (
               <YAxis
                 yAxisId="overlayAxis"
@@ -380,7 +387,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
             {showVolume && (
               <Bar 
                 dataKey="volume" 
-                yAxisId="primary" 
+                yAxisId="volumeAxis" 
                 fill="#334155" 
                 opacity={0.35} 
                 barSize={12}

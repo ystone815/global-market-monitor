@@ -65,7 +65,7 @@ const RenderCandlesticks = (props: any) => {
 
         return (
           <g key={`candle-${idx}`}>
-            {/* Wick */}
+            {/* Wick Line */}
             <line
               x1={x}
               y1={yHigh}
@@ -75,7 +75,7 @@ const RenderCandlesticks = (props: any) => {
               strokeWidth={1.5}
               opacity={0.9}
             />
-            {/* Body */}
+            {/* Candle Body */}
             <rect
               x={x - candleWidth / 2}
               y={candleTop}
@@ -144,6 +144,12 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
   }, [selectedQuote.symbol, timeframe, overlayAsset]);
 
   const isPositive = selectedQuote.change >= 0;
+
+  // Exact Y Domain calculation so candlesticks and lines scale perfectly
+  const minLow = chartData.length > 0 ? Math.min(...chartData.map(d => d.low || d.close)) : 0;
+  const maxHigh = chartData.length > 0 ? Math.max(...chartData.map(d => d.high || d.close)) : 100;
+  const padding = (maxHigh - minLow) * 0.05 || 10;
+  const yDomain = [Math.max(0, Number((minLow - padding).toFixed(2))), Number((maxHigh + padding).toFixed(2))];
 
   // Custom Tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -348,7 +354,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
             />
             <YAxis 
               yAxisId="primary"
-              domain={['auto', 'auto']} 
+              domain={yDomain} 
               stroke="#64748b" 
               fontSize={11} 
               tickLine={false} 

@@ -9,7 +9,6 @@ interface ChartPoint {
   close: number;
   volume: number;
   sma20?: number;
-  rsi?: number;
 }
 
 // Fetch historical K-line candles from Binance for Crypto
@@ -39,11 +38,11 @@ async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<Ch
           timeStr = openTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        const open = parseFloat(k[1]);
-        const high = parseFloat(k[2]);
-        const low = parseFloat(k[3]);
-        const close = parseFloat(k[4]);
-        const volume = parseFloat(k[5]);
+        const open = Number(parseFloat(k[1]).toFixed(2));
+        const high = Number(parseFloat(k[2]).toFixed(2));
+        const low = Number(parseFloat(k[3]).toFixed(2));
+        const close = Number(parseFloat(k[4]).toFixed(2));
+        const volume = Math.round(parseFloat(k[5]));
 
         return {
           time: timeStr,
@@ -52,7 +51,7 @@ async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<Ch
           high,
           low,
           close,
-          volume: Math.round(volume)
+          volume
         };
       });
 
@@ -83,9 +82,8 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
   if (timeframe === '1M') { range = '1mo'; interval = '1d'; }
   if (timeframe === '1Y') { range = '1y'; interval = '1wk'; }
 
-  // Symbol mapping
   let yahooSymbol = symbol;
-  if (symbol === 'M2-SUPPLY') yahooSymbol = '^GSPC'; // Fallback mapping for M2 visualization
+  if (symbol === 'M2-SUPPLY') yahooSymbol = '^GSPC';
 
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
@@ -113,7 +111,7 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
       const points: ChartPoint[] = [];
 
       for (let i = 0; i < timestamps.length; i++) {
-        if (closes[i] !== null && closes[i] !== undefined) {
+        if (closes[i] !== null && closes[i] !== undefined && !isNaN(closes[i])) {
           const t = new Date(timestamps[i] * 1000);
           let timeStr = `${t.getMonth() + 1}/${t.getDate()}`;
           if (timeframe === '1D' || timeframe === '1W') {
@@ -121,17 +119,17 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
           }
 
           const close = Number(closes[i].toFixed(2));
-          const open = Number((opens[i] || close).toFixed(2));
-          const high = Number((highs[i] || close).toFixed(2));
-          const low = Number((lows[i] || close).toFixed(2));
+          const open = Number((opens[i] ?? close).toFixed(2));
+          const high = Number((highs[i] ?? Math.max(open, close)).toFixed(2));
+          const low = Number((lows[i] ?? Math.min(open, close)).toFixed(2));
           const volume = volumes[i] || 10000;
 
           points.push({
             time: timeStr,
             price: close,
             open,
-            high,
-            low,
+            high: Math.max(high, open, close),
+            low: Math.min(low, open, close),
             close,
             volume
           });
@@ -139,7 +137,6 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
       }
 
       if (points.length > 0) {
-        // Calculate SMA 20
         return points.map((pt, idx, arr) => {
           let sma20 = pt.close;
           if (idx >= 19) {

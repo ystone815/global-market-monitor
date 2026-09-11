@@ -16,9 +16,9 @@ async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<Ch
   let interval = '1d';
   let targetLimit = 30;
   if (timeframe === '1D') { interval = '15m'; targetLimit = 24; }
-  if (timeframe === '1W') { interval = '1h'; targetLimit = 35; }
+  if (timeframe === '1W') { interval = '1h'; targetLimit = 168; }
   if (timeframe === '1M') { interval = '1d'; targetLimit = 30; }
-  if (timeframe === '1Y') { interval = '1w'; targetLimit = 52; }
+  if (timeframe === '1Y') { interval = '1d'; targetLimit = 365; } // Daily candles for 1 Year
 
   // Fetch extra 20 points for proper 20-period SMA lookback
   const fetchLimit = targetLimit + 20;
@@ -97,7 +97,7 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
   if (timeframe === '1D') { range = '1d'; interval = '15m'; }
   if (timeframe === '1W') { range = '5d'; interval = '30m'; }
   if (timeframe === '1M') { range = '3mo'; interval = '1d'; }
-  if (timeframe === '1Y') { range = '1y'; interval = '1wk'; }
+  if (timeframe === '1Y') { range = '1y'; interval = '1d'; }
 
   let yahooSymbol = symbol;
   if (symbol === 'M2-SUPPLY') yahooSymbol = '^GSPC';

@@ -13,7 +13,8 @@ import {
   XAxis, 
   YAxis, 
   Tooltip, 
-  CartesianGrid
+  CartesianGrid,
+  Brush
 } from 'recharts';
 import { 
   BarChart2, 
@@ -27,7 +28,10 @@ import {
   Bitcoin as BitcoinIcon,
   Banknote,
   CandlestickChart,
-  RefreshCw
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from 'lucide-react';
 
 interface MainChartStationProps {
@@ -102,6 +106,43 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [isLoadingChart, setIsLoadingChart] = useState<boolean>(false);
 
+  // Zoom control state
+  const [zoomRange, setZoomRange] = useState<{ startIndex?: number; endIndex?: number }>({});
+
+  // Reset zoom range whenever selected asset or timeframe changes
+  useEffect(() => {
+    setZoomRange({});
+  }, [selectedQuote.symbol, timeframe]);
+
+  const handleZoomIn = () => {
+    if (!chartData || chartData.length < 6) return;
+    const currStart = zoomRange.startIndex ?? 0;
+    const currEnd = zoomRange.endIndex ?? chartData.length - 1;
+    const span = currEnd - currStart;
+    if (span <= 6) return;
+
+    const step = Math.max(1, Math.floor(span * 0.2));
+    const newStart = Math.min(currStart + step, currEnd - 5);
+    const newEnd = Math.max(currEnd - step, newStart + 5);
+    setZoomRange({ startIndex: newStart, endIndex: newEnd });
+  };
+
+  const handleZoomOut = () => {
+    if (!chartData || chartData.length === 0) return;
+    const currStart = zoomRange.startIndex ?? 0;
+    const currEnd = zoomRange.endIndex ?? chartData.length - 1;
+    const span = currEnd - currStart;
+
+    const step = Math.max(1, Math.floor(span * 0.2));
+    const newStart = Math.max(0, currStart - step);
+    const newEnd = Math.min(chartData.length - 1, currEnd + step);
+    setZoomRange({ startIndex: newStart, endIndex: newEnd });
+  };
+
+  const handleResetZoom = () => {
+    setZoomRange({});
+  };
+
   // Fetch real-time chart history from /api/chart
   useEffect(() => {
     let isMounted = true;
@@ -145,9 +186,17 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
 
   const isPositive = selectedQuote.change >= 0;
 
+  // Compute visible data slice based on zoom range
+  const visibleData = React.useMemo(() => {
+    if (!chartData || chartData.length === 0) return [];
+    const start = zoomRange.startIndex ?? 0;
+    const end = zoomRange.endIndex ?? chartData.length - 1;
+    return chartData.slice(Math.max(0, start), Math.min(chartData.length, end + 1));
+  }, [chartData, zoomRange]);
+
   // Exact Y Domain calculation for price candles so they scale perfectly
-  const minLow = chartData.length > 0 ? Math.min(...chartData.map(d => d.low || d.close)) : 0;
-  const maxHigh = chartData.length > 0 ? Math.max(...chartData.map(d => d.high || d.close)) : 100;
+  const minLow = visibleData.length > 0 ? Math.min(...visibleData.map(d => d.low || d.close)) : 0;
+  const maxHigh = visibleData.length > 0 ? Math.max(...visibleData.map(d => d.high || d.close)) : 100;
   const padding = (maxHigh - minLow) * 0.08 || 10;
   const yDomain = [Math.max(0, Number((minLow - padding).toFixed(2))), Number((maxHigh + padding).toFixed(2))];
 
@@ -308,6 +357,34 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               Volume
             </button>
           </div>
+
+          {/* Interactive Zoom Controls */}
+          <div className="glass-pill p-1 rounded-xl flex items-center gap-1 text-xs">
+            <button
+              onClick={handleZoomIn}
+              className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-0.5 px-1.5"
+              title="Zoom In (+)"
+            >
+              <ZoomIn className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-[10px] font-mono">+</span>
+            </button>
+            <button
+              onClick={handleZoomOut}
+              className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-0.5 px-1.5"
+              title="Zoom Out (-)"
+            >
+              <ZoomOut className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-[10px] font-mono">-</span>
+            </button>
+            <button
+              onClick={handleResetZoom}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-1 px-1.5"
+              title="Reset Zoom"
+            >
+              <RotateCcw className="w-3 h-3 text-slate-400" />
+              <span className="text-[10px] font-mono">Reset</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -462,6 +539,23 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
                 dot={false}
               />
             )}
+
+            {/* Interactive Brush Slider for Zoom & Drag */}
+            <Brush
+              dataKey="time"
+              height={26}
+              stroke="#6366f1"
+              fill="#0f172a"
+              travellerWidth={8}
+              startIndex={zoomRange.startIndex}
+              endIndex={zoomRange.endIndex}
+              onChange={(e: any) => {
+                if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
+                  setZoomRange({ startIndex: e.startIndex, endIndex: e.endIndex });
+                }
+              }}
+              tickFormatter={() => ''}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

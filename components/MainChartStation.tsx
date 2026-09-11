@@ -185,7 +185,13 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
           {showVolume && (
             <div className="flex justify-between gap-4 text-slate-400">
               <span>Volume:</span>
-              <span>{data.volume.toLocaleString()}</span>
+              <span>
+                {data.volume >= 1000000
+                  ? `$${(data.volume / 1000000).toFixed(2)}B`
+                  : data.volume >= 1000
+                  ? `$${(data.volume / 1000).toFixed(2)}M`
+                  : `$${data.volume.toLocaleString()}K`}
+              </span>
             </div>
           )}
         </div>
@@ -351,6 +357,7 @@ export function MainChartStation({ selectedQuote }: MainChartStationProps) {
               fontSize={11} 
               tickLine={false} 
               axisLine={{ stroke: '#334155' }}
+              minTickGap={25}
             />
             <YAxis 
               yAxisId="primary"

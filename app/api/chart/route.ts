@@ -14,11 +14,14 @@ interface ChartPoint {
 // Fetch historical K-line candles from Binance for Crypto
 async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<ChartPoint[] | null> {
   let interval = '1d';
-  let limit = 30;
-  if (timeframe === '1D') { interval = '15m'; limit = 24; }
-  if (timeframe === '1W') { interval = '1h'; limit = 35; }
-  if (timeframe === '1M') { interval = '1d'; limit = 30; }
-  if (timeframe === '1Y') { interval = '1w'; limit = 52; }
+  let targetLimit = 30;
+  if (timeframe === '1D') { interval = '15m'; targetLimit = 24; }
+  if (timeframe === '1W') { interval = '1h'; targetLimit = 35; }
+  if (timeframe === '1M') { interval = '1d'; targetLimit = 30; }
+  if (timeframe === '1Y') { interval = '1w'; targetLimit = 52; }
+
+  // Fetch extra 20 points for proper 20-period SMA lookback
+  const fetchLimit = targetLimit + 20;
 
   let binanceSymbol = 'BTCUSDT';
   if (symbol.includes('ETH')) binanceSymbol = 'ETHUSDT';
@@ -26,23 +29,34 @@ async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<Ch
 
   try {
     const res = await fetch(
-      `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`,
+      `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${fetchLimit}`,
       { cache: 'no-store' }
     );
     if (res.ok) {
       const raw = await res.json();
-      const points: ChartPoint[] = raw.map((k: any) => {
+      const allPoints: ChartPoint[] = raw.map((k: any) => {
         const openTime = new Date(k[0]);
         let timeStr = `${openTime.getMonth() + 1}/${openTime.getDate()}`;
         if (timeframe === '1D') {
           timeStr = openTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (timeframe === '1W') {
+          const m = openTime.getMonth() + 1;
+          const d = openTime.getDate();
+          const hh = openTime.getHours().toString().padStart(2, '0');
+          timeStr = `${m}/${d} ${hh}:00`;
+        } else if (timeframe === '1Y') {
+          const yy = openTime.getFullYear().toString().substring(2);
+          const m = openTime.getMonth() + 1;
+          const d = openTime.getDate();
+          timeStr = `${yy}/${m}/${d}`;
         }
 
         const open = Number(parseFloat(k[1]).toFixed(2));
         const high = Number(parseFloat(k[2]).toFixed(2));
         const low = Number(parseFloat(k[3]).toFixed(2));
         const close = Number(parseFloat(k[4]).toFixed(2));
-        const volume = Math.round(parseFloat(k[5]));
+        // k[7] is USDT volume (in USD thousands)
+        const volume = Math.round(parseFloat(k[7]) / 1000);
 
         return {
           time: timeStr,
@@ -55,16 +69,19 @@ async function fetchBinanceKlines(symbol: string, timeframe: string): Promise<Ch
         };
       });
 
-      // Calculate SMA 20
-      return points.map((pt, idx, arr) => {
-        let sma20 = pt.close;
+      // Calculate SMA 20 with exact lookback across all points
+      const withSMA = allPoints.map((pt, idx, arr) => {
         if (idx >= 19) {
           const slice = arr.slice(idx - 19, idx + 1);
           const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
-          sma20 = Number((sum / 20).toFixed(2));
+          const sma20 = Number((sum / 20).toFixed(2));
+          return { ...pt, sma20 };
         }
-        return { ...pt, sma20 };
+        return { ...pt, sma20: pt.close };
       });
+
+      // Return exact targetLimit points with smooth SMA 20!
+      return withSMA.slice(-targetLimit);
     }
   } catch (e) {
     console.error('Binance klines fetch error:', e);
@@ -79,7 +96,7 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
 
   if (timeframe === '1D') { range = '1d'; interval = '15m'; }
   if (timeframe === '1W') { range = '5d'; interval = '30m'; }
-  if (timeframe === '1M') { range = '1mo'; interval = '1d'; }
+  if (timeframe === '1M') { range = '3mo'; interval = '1d'; }
   if (timeframe === '1Y') { range = '1y'; interval = '1wk'; }
 
   let yahooSymbol = symbol;
@@ -114,8 +131,18 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
         if (closes[i] !== null && closes[i] !== undefined && !isNaN(closes[i])) {
           const t = new Date(timestamps[i] * 1000);
           let timeStr = `${t.getMonth() + 1}/${t.getDate()}`;
-          if (timeframe === '1D' || timeframe === '1W') {
+          if (timeframe === '1D') {
             timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } else if (timeframe === '1W') {
+            const m = t.getMonth() + 1;
+            const d = t.getDate();
+            const hh = t.getHours().toString().padStart(2, '0');
+            timeStr = `${m}/${d} ${hh}:00`;
+          } else if (timeframe === '1Y') {
+            const yy = t.getFullYear().toString().substring(2);
+            const m = t.getMonth() + 1;
+            const d = t.getDate();
+            timeStr = `${yy}/${m}/${d}`;
           }
 
           const close = Number(closes[i].toFixed(2));
@@ -137,15 +164,24 @@ async function fetchYahooChart(symbol: string, timeframe: string): Promise<Chart
       }
 
       if (points.length > 0) {
-        return points.map((pt, idx, arr) => {
+        const withSMA = points.map((pt, idx, arr) => {
           let sma20 = pt.close;
           if (idx >= 19) {
             const slice = arr.slice(idx - 19, idx + 1);
             const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
             sma20 = Number((sum / 20).toFixed(2));
+          } else if (arr.length >= 5) {
+            const slice = arr.slice(0, idx + 1);
+            const sum = slice.reduce((acc, curr) => acc + curr.close, 0);
+            sma20 = Number((sum / slice.length).toFixed(2));
           }
           return { ...pt, sma20 };
         });
+
+        if (timeframe === '1M' && withSMA.length > 30) {
+          return withSMA.slice(-30);
+        }
+        return withSMA;
       }
     }
   } catch (e) {
